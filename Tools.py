@@ -4,15 +4,6 @@ Created on Thu Apr 12 13:30:25 2018
 
 @author: nhermans
 """
-
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan  3 14:52:17 2018
-
-@author: nhermans
-"""
-#from lmfit import Parameters
-
 import numpy as np
 from scipy import signal
 
@@ -58,18 +49,11 @@ def read_data(Filename):
     headers = f.readlines()[0]
     headers = headers.split('\t')
     #get data
-    f.seek(0) #seek to beginning of the file
-    data = f.readlines()[1:]
-    f.close()
-    F = np.array([])
-    Z = np.array([])
-    T = np.array([])
-    Z_Selected = np.array([])
-    for idx,item in enumerate(data):                                            #Get all the data from the fitfile
-        F = np.append(F,float(item.split()[headers.index('F (pN)')]))
-        Z = np.append(Z,float(item.split()[headers.index('z (um)')])*1000)   
-        T = np.append(T,float(item.split()[headers.index('t (s)')]))
-        Z_Selected = np.append(Z_Selected,float(item.split()[headers.index('selected z (um)')])*1000)
+    data = np.genfromtxt(Filename, skip_header = 1)
+    F = data[:,headers.index('F (pN)')]
+    Z = data[:,headers.index('z (um)')]*1000  #Z in nm
+    T = data[:,headers.index('t (s)')]
+    Z_Selected = data[:,headers.index('selected z (um)')]*1000
     return F, Z, T, Z_Selected
 
 def read_sequence(SequenceFile):
