@@ -16,8 +16,8 @@ import Tools
 import Functions as func
 
 #Import Data
-file_location="G:\\test\\"
-file_name="FC2_pBlue_05ul_eh_good_data_016_39"
+file_location=r"N:\Klaas\Tweezer\180518\Unzip18S B2"
+file_name="\\CorrectedDat_data_009_61"
 SequenceFile="G:\\klaas\\Unzipping\\18S_seq.txt"
 file_extension=".fit"
 FilePath=file_location+file_name+file_extension
@@ -48,10 +48,14 @@ Fit_F = forcedown[forcedown >= 20]
 Fit_Z = Fit_Z[Fit_F < MaxForce]
 Fit_F = Fit_F[Fit_F < MaxForce]
 
-popt = curve_fit(lambda f, p: func.fit_p(f, p, len(sequence)), Fit_F, Fit_Z, p0 = Pars['Pss_nm'])
-
-print(popt)
-Pars['Pss_nm'] = popt[0][0]
+try:
+    popt = curve_fit(lambda f, p: func.fit_p(f, p, len(sequence)), Fit_F, Fit_Z, p0 = Pars['Pss_nm'])
+    print("Fitted " + popt)
+    Pars['Pss_nm'] = popt[0][0]
+except:
+    Pars['Pss_nm'] = 0.65
+    print( ">>>>>>>>>>>> ssDNA Persistence Length Fit Failed, using " , Pars['Pss_nm'] , " nm")
+    
 
 #Histogram data: change extension to bp
 CLss_down_bp = (extensiondown-Pars['DNAds_nm']*Pars['CLds_bp']*func.wlc(forcedown, Pars))/(Pars['DNAss_nm']*2*func.fjc(forcedown, Pars))
