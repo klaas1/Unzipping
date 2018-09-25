@@ -16,15 +16,15 @@ import Tools
 import Functions as func
 
 #Import Data
-file_location=r"N:\Klaas\Tweezer\180518\Unzip18S B2"
-file_name="\\CorrectedDat_data_009_61"
-SequenceFile="G:\\klaas\\Unzipping\\18S_seq.txt"
-file_extension=".fit"
-FilePath=file_location+file_name+file_extension
+folder=r"N:\Klaas\ScriptsForJohn\Unzipping"
+file_name="test_avaI.fit"
+SequenceFile="pBlue_avaI.txt"
+#file_extension=".fit"
+#FilePath=r'N:\Klaas\ScriptsForJohn\BrowerToland\Analysis'
 
 sequence=Tools.read_sequence(SequenceFile)
 Pars = Tools.default_pars()
-Force, Z, Time, Extension_nm = Tools.read_data(FilePath)
+Force, Z, Time, Extension_nm = Tools.read_data(file_name)
 Handles = Tools.Define_Handles(Select=True, Pull=True, DelBreaks=True, MinForce=2.5, MinZ=0, MedFilt=False)
 Force, Extension_nm, Time = Tools.handle_data(Force, Z, Time, Extension_nm, Handles, Pars)
 
@@ -45,14 +45,14 @@ print(MaxForce)
 if MaxForce < 25: MaxForce=25
 Fit_Z = extensiondown[forcedown >= 20]
 Fit_F = forcedown[forcedown >= 20]
-Fit_Z = Fit_Z[Fit_F < MaxForce]
-Fit_F = Fit_F[Fit_F < MaxForce]
+Fit_Z = np.array(Fit_Z[Fit_F < MaxForce])
+Fit_F = np.array(Fit_F[Fit_F < MaxForce])
 
 try:
     popt = curve_fit(lambda f, p: func.fit_p(f, p, len(sequence)), Fit_F, Fit_Z, p0 = Pars['Pss_nm'])
-    print("Fitted " + popt)
+    print("Fitted " + str(popt))
     Pars['Pss_nm'] = popt[0][0]
-except:
+except RuntimeError:
     Pars['Pss_nm'] = 0.65
     print( ">>>>>>>>>>>> ssDNA Persistence Length Fit Failed, using " , Pars['Pss_nm'] , " nm")
     
@@ -63,7 +63,7 @@ CLss_up_bp = (extensionup-Pars['DNAds_nm']*Pars['CLds_bp']*func.wlc(forceup, Par
 
 #FE and histogram graph generator
 #Legend creator for FE graph
-a  = plt.scatter(extensionup, forceup, color = 'blue', marker = 'o', s = 1, label = 'Pull')
+a  = plt.scatter(extensionup, forceup, color = 'blue', marker = 'o', s = 16, label = 'Pull')
 b  = plt.scatter(extensiondown, forcedown, color = 'green', marker = 'o', s = 1, label = 'Relax')
 c, = plt.plot(func.wlc(Force, Pars)*Pars['DNAds_nm']*Pars['CLds_bp'],Force, color = 'black', linewidth=1.0, label = "WLC ")
 d, = plt.plot(func.wlc(Force, Pars)*Pars['DNAds_nm']*Pars['CLds_bp']+func.fjc(Force, Pars)*Pars['DNAss_nm']*len(sequence)*2, Force, color = 'red',linewidth=1.0, label = 'DWLC')
@@ -101,7 +101,7 @@ plt.savefig('170707_63_GC_DWLC.pdf') #save file name for histogram + GC-content 
 plt.legend(loc=1)
 plt.show()
 
-FilePath=file_location+file_name+"_pull.dat"
+FilePath="_pull.dat"
 file = open(FilePath, "w")
 
 for i in range(0,len(timeup)):
@@ -111,7 +111,7 @@ for i in range(0,len(timeup)):
 
 file.close()
 
-FilePath=file_location+file_name+"_release.dat"
+FilePath="_release.dat"
 file = open(FilePath, "w")
 
 for i in range(0,len(timedown)):
@@ -121,7 +121,7 @@ for i in range(0,len(timedown)):
 
 file.close()
 
-FilePath=file_location+file_name+"_hist.dat"
+FilePath="_hist.dat"
 file = open(FilePath, "w")
 
 for i in range(0,len(CLss_up_bp)):
